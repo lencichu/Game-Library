@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function GameCard({ game, requestCover, covers, loadingCovers }) {
+export default function GameCard({ game, requestCover, covers, loadingCovers, onOpen }) {
   const ref = useRef(null);
   const [imgError, setImgError] = useState(false);
 
@@ -25,7 +25,19 @@ export default function GameCard({ game, requestCover, covers, loadingCovers }) 
   const showImage = coverUrl && !imgError;
 
   return (
-    <div ref={ref} className="game-card">
+    <div
+      ref={ref}
+      className="game-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(game)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(game);
+        }
+      }}
+    >
       <div className="game-card__badges">
         {game.jp && <span className="badge badge--jp">JP</span>}
         {game.dup && <span className="badge badge--dup">×2</span>}

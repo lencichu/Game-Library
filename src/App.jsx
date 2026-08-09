@@ -6,6 +6,7 @@ import Logo from "./components/Logo.jsx";
 import Tab from "./components/Tab.jsx";
 import ConsolePanel from "./components/ConsolePanel.jsx";
 import { SagaView, GridView } from "./components/GamesView.jsx";
+import GameDetailModal from "./components/GameDetailModal.jsx";
 
 const LEGEND = [
   ["JP", "Versión japonesa"],
@@ -31,6 +32,7 @@ export default function App() {
   const [filterJP, setFilterJP] = useState(false);
   const [filterBox, setFilterBox] = useState(false);
   const [filterSpecial, setFilterSpecial] = useState(false);
+  const [selectedGame, setSelectedGame] = useState(null);
   const { covers, loadingCovers, requestCover } = useCovers();
 
   const allGames = useMemo(
@@ -171,9 +173,21 @@ export default function App() {
 
       <main className="catalog">
         {showSagaView ? (
-          <SagaView games={displayGames} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} />
+          <SagaView
+            games={displayGames}
+            requestCover={requestCover}
+            covers={covers}
+            loadingCovers={loadingCovers}
+            onOpenGame={setSelectedGame}
+          />
         ) : (
-          <GridView games={sortedGames} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} />
+          <GridView
+            games={sortedGames}
+            requestCover={requestCover}
+            covers={covers}
+            loadingCovers={loadingCovers}
+            onOpenGame={setSelectedGame}
+          />
         )}
         {displayGames.length === 0 && <p className="empty-state">No se encontraron juegos.</p>}
       </main>
@@ -181,6 +195,15 @@ export default function App() {
       <footer className="site-footer">
         {allGames.length} juegos · {CONSOLES.length} consolas · Colección personal {new Date().getFullYear()}
       </footer>
+
+      {selectedGame && (
+        <GameDetailModal
+          game={selectedGame}
+          consoleData={CONSOLES.find((c) => c.id === selectedGame.consoleId)}
+          coverUrl={covers[selectedGame.id]}
+          onClose={() => setSelectedGame(null)}
+        />
+      )}
     </div>
   );
 }

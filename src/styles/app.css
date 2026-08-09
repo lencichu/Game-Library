@@ -441,3 +441,79 @@ main.catalog {
   .console-card__photo { width: 72px; height: 72px; }
   .game-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
 }
+
+/* ---------- Game detail modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 13, 26, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+  z-index: 1000;
+}
+
+.modal-panel {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--r-4);
+  box-shadow: var(--shadow-raised);
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--fg2);
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 2;
+}
+.modal-close:hover { color: var(--fg1); border-color: var(--accent); }
+
+.modal-body {
+  display: flex;
+  gap: var(--s-5);
+  padding: var(--s-6);
+  flex-wrap: wrap;
+}
+
+.modal-cover {
+  width: 200px;
+  aspect-ratio: 3 / 4;
+  flex-shrink: 0;
+  border-radius: var(--r-3);
+  overflow: hidden;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+}
+.modal-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-cover__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.modal-info { flex: 1; min-width: 220px; }
+
+.modal-jp-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  color: var(--gold-600);
+  margin-top: 2px;
+}

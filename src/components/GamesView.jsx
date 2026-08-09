@@ -11,7 +11,7 @@ function groupBySaga(games) {
   return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-export function SagaView({ games, requestCover, covers, loadingCovers }) {
+export function SagaView({ games, requestCover, covers, loadingCovers, onOpenGame }) {
   const groups = groupBySaga(games);
   return (
     <div>
@@ -24,7 +24,7 @@ export function SagaView({ games, requestCover, covers, loadingCovers }) {
           </div>
           <div className="game-grid">
             {list.map((g) => (
-              <GameCard key={g.id} game={g} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} />
+              <GameCard key={g.id} game={g} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} onOpen={onOpenGame} />
             ))}
           </div>
         </div>
@@ -33,11 +33,11 @@ export function SagaView({ games, requestCover, covers, loadingCovers }) {
   );
 }
 
-export function GridView({ games, requestCover, covers, loadingCovers }) {
+export function GridView({ games, requestCover, covers, loadingCovers, onOpenGame }) {
   return (
     <div className="game-grid">
       {games.map((g) => (
-        <GameCard key={g.id} game={g} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} />
+        <GameCard key={g.id} game={g} requestCover={requestCover} covers={covers} loadingCovers={loadingCovers} onOpen={onOpenGame} />
       ))}
     </div>
   );
