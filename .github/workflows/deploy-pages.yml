@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_RAWG_API_KEY: ${{ secrets.RAWG_API_KEY }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true

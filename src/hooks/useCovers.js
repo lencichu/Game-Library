@@ -1,21 +1,40 @@
 import { useCallback, useRef, useState } from "react";
 
 // ─────────────────────────────────────────────
-// COVER RESOLUTION — public, keyless sources only
+// COVER RESOLUTION
 //
-// 1) If the game already carries a known IGDB image hash, hotlink it
-//    directly from IGDB's public image CDN (no auth needed to *read*
-//    an image once you have its hash).
-// 2) Otherwise, ask Wikipedia's public REST/Action API for the lead
-//    image of the matching article. It's free, requires no API key,
-//    and returns CORS-friendly responses (origin=*) so it works
-//    straight from the browser.
+// The dataset originally carried a `igdb` image hash per game, meant
+// to hotlink IGDB's public CDN directly. Those hashes turned out to
+// be fabricated (they resolved to unrelated images — e.g. "Bayonetta
+// 3" showed a Five Nights at Freddy's screenshot), so they are no
+// longer used at all.
+//
+// Primary source: RAWG.io's public games API (https://rawg.io/apidocs),
+// searched by title. Requires a free API key — set VITE_RAWG_API_KEY
+// at build time (see .env.example). Without a key configured, cover
+// lookup falls back straight to Wikipedia.
+//
+// Fallback: Wikipedia's public REST/Action API for the lead image of
+// the matching article. Free, no API key, CORS-friendly (origin=*).
+// Less precise than RAWG (can match the wrong article for ambiguous
+// or non-English titles), used only when RAWG has no key configured
+// or returns no result.
 // ─────────────────────────────────────────────
 
-const IGDB_COVER_BASE = "https://images.igdb.com/igdb/image/upload/t_cover_big/";
+const RAWG_API_KEY = import.meta.env.VITE_RAWG_API_KEY;
+const RAWG_API = "https://api.rawg.io/api/games";
 const WIKI_API = "https://en.wikipedia.org/w/api.php";
-const CACHE_KEY = "gl_cover_cache_v1";
+const CACHE_KEY = "gl_cover_cache_v2"; // v2: drop the bogus igdb-hash-based cache
 const THROTTLE_MS = 60;
+
+// Strip our own inventory annotations (region/condition/copy notes)
+// before searching — they're not part of the real game title and
+// only hurt matching, e.g. "Bomberman GB (JP, caja)" -> "Bomberman GB".
+const NOISE_PAREN = /\s*\((?:[^()]*\b(?:jp|caja|cartucho|copia|bundle|cart|ilegible|no identificad\w*|t[ií]tulo en japon\w*)\b[^()]*)\)/gi;
+
+function cleanTitle(title) {
+  return title.replace(NOISE_PAREN, "").trim();
+}
 
 function loadCache() {
   try {
@@ -33,12 +52,29 @@ function saveCache(cache) {
   }
 }
 
+async function fetchRawgCover(title) {
+  if (!RAWG_API_KEY) return null;
+  try {
+    const params = new URLSearchParams({
+      key: RAWG_API_KEY,
+      search: cleanTitle(title),
+      page_size: "1",
+    });
+    const res = await fetch(`${RAWG_API}?${params.toString()}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.results?.[0]?.background_image || null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchWikipediaCover(title) {
   try {
     const params = new URLSearchParams({
       action: "query",
       generator: "search",
-      gsrsearch: `${title} video game`,
+      gsrsearch: `${cleanTitle(title)} video game`,
       gsrlimit: "1",
       prop: "pageimages",
       piprop: "original",
@@ -58,13 +94,12 @@ async function fetchWikipediaCover(title) {
 }
 
 async function resolveCoverUrl(game) {
-  if (game.igdb) return `${IGDB_COVER_BASE}${game.igdb}.jpg`;
-  return fetchWikipediaCover(game.t);
+  return (await fetchRawgCover(game.t)) || (await fetchWikipediaCover(game.t));
 }
 
 /**
  * Lazily resolves and caches cover art URLs for games, throttling
- * requests so we don't hammer Wikipedia when hundreds of cards mount
+ * requests so we don't hammer the APIs when hundreds of cards mount
  * at once.
  */
 export function useCovers() {

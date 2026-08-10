@@ -7,7 +7,9 @@
 //   saga  saga / franchise grouping label
 //   b     1 if the physical box is owned, 0 if cartridge/disc only
 //   id    stable unique id (also used as the cover-art cache key)
-//   igdb  optional known IGDB cover image hash (skips the Wikipedia lookup)
+//   igdb  UNUSED — turned out to be fabricated IGDB hashes that resolved
+//         to unrelated images (see src/hooks/useCovers.js). Left in the
+//         data as-is rather than stripped from ~300 entries; ignore it.
 //   jp    1 if this is the Japanese release
 //   jt    Japanese title, shown when jp is set
 //   dup   1 if this is a duplicate copy already counted elsewhere
